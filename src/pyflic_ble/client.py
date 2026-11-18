@@ -302,8 +302,10 @@ class FlicClient:
                         FLIC_MTU,
                     )
 
-            # Request connection parameters for better responsiveness
-            await self._request_connection_parameters()
+            # Connection parameters (slave latency) are requested after the
+            # handshake, in _start_inner: requested here, the button may skip
+            # up to CONN_PARAM_LATENCY connection events per reply, which
+            # stretched each handshake round trip to 2-3 s.
 
             # Start notifications using handler's characteristic UUID
             _LOGGER.debug(
@@ -618,6 +620,7 @@ class FlicClient:
             await self.connect()
             await self.quick_verify()
             await self.init_button_events()
+            await self._request_connection_parameters()
             await self._send_connection_parameters()
 
             # Request battery level (non-fatal)
